@@ -1,0 +1,1199 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Gewicht">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f4f3f8">
+<meta name="robots" content="noindex">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<script>window.WT_MODE = 'local';</script>
+<title>Gewichts-Tracker</title>
+</head>
+<body>
+<style>
+:root{
+  --bg:#f4f3f8; --card:#ffffff; --card2:#eeedf4; --text:#16151d; --muted:#6f6d7e; --hair:#e3e1ec;
+  --accent:#5b54e8; --accent-soft:#e9e7ff; --on-accent:#ffffff;
+  --good:#12996b; --warn:#dd7a1c; --danger:#d5413a;
+  --p-diaet:#2f8fe0; --p-aufbau:#c054d6; --p-erhalt:#8d92a0;
+  --shadow:0 1px 2px rgba(20,18,40,.05),0 4px 16px rgba(20,18,40,.05);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#171a21; --card:#222733; --card2:#2b313f; --text:#f1f2f6; --muted:#9aa1b2; --hair:#333a49;
+    --accent:#8f8aff; --accent-soft:#2f2f57; --on-accent:#12122a;
+    --good:#34c98a; --warn:#f0a04b; --danger:#ff6b63;
+    --p-diaet:#55a8f0; --p-aufbau:#d27be4; --p-erhalt:#a3a9b8;
+    --shadow:none; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#171a21; --card:#222733; --card2:#2b313f; --text:#f1f2f6; --muted:#9aa1b2; --hair:#333a49;
+  --accent:#8f8aff; --accent-soft:#2f2f57; --on-accent:#12122a;
+  --good:#34c98a; --warn:#f0a04b; --danger:#ff6b63;
+  --p-diaet:#55a8f0; --p-aufbau:#d27be4; --p-erhalt:#a3a9b8;
+  --shadow:none; color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:16px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  overscroll-behavior-y:none}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+.app{max-width:600px;margin:0 auto;padding-block:14px 96px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{display:flex;align-items:center;justify-content:space-between;margin:6px 0 14px}
+header.top h1{font-size:32px;line-height:1.1;margin:0;letter-spacing:-.02em}
+.add{width:44px;height:44px;border-radius:50%;background:var(--accent);color:var(--on-accent);
+  display:grid;place-items:center;box-shadow:var(--shadow)}
+.add svg{width:22px;height:22px}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)} .good{color:var(--good)} .warn{color:var(--warn)}
+.card{background:var(--card);border-radius:18px;box-shadow:var(--shadow)}
+.section-title{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:22px 4px 8px}
+
+/* Dashboard */
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{padding:12px 14px;text-align:left;display:block;width:100%;min-width:0}
+.tile .k{font-size:12px;color:var(--muted);font-weight:600}
+.tile .v{font-size:22px;font-weight:700;letter-spacing:-.01em;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .v small{font-size:13px;font-weight:600;color:var(--muted)}
+.tile .s{font-size:12.5px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:700;color:#fff}
+.b-Diät{background:var(--p-diaet)} .b-Aufbau{background:var(--p-aufbau)} .b-Erhalt{background:var(--p-erhalt)}
+
+/* Segmentleiste */
+.seg{display:flex;background:var(--card2);border-radius:12px;padding:3px;gap:2px}
+.seg button{flex:1;padding:7px 0;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--muted);min-width:0}
+.seg button.on{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.custom{display:flex;gap:8px;align-items:center;margin-top:8px;font-size:14px}
+.custom input{flex:1;min-width:0}
+input[type=date],input[type=text],textarea,select{background:var(--card2);border:1px solid transparent;border-radius:11px;padding:10px 12px;width:100%;
+  -webkit-appearance:none;appearance:none;min-height:44px}
+input:focus,textarea:focus{outline:none;border-color:var(--accent)}
+
+/* Diagramm */
+.chartcard{padding:14px 10px 8px 14px;margin-top:10px}
+.readout{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding-right:6px;min-height:42px}
+.readout .d{font-size:14px;font-weight:600}
+.readout .n{font-size:12.5px;color:var(--muted);display:block;font-weight:400;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.readout .w{font-size:20px;font-weight:700;white-space:nowrap}
+#chart{touch-action:pan-y;user-select:none;-webkit-user-select:none}
+#chart svg{display:block;width:100%;height:auto;overflow:visible}
+#chart text{font-size:10.5px;fill:var(--muted);font-variant-numeric:tabular-nums}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11.5px;color:var(--muted);padding:2px 0 4px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.legend i.sq{height:9px;width:9px;opacity:.5}
+.empty{padding:38px 16px;text-align:center;color:var(--muted);font-size:14.5px}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.stat{padding:10px 10px}
+.stat .k{font-size:11.5px;color:var(--muted);font-weight:600}
+.stat .v{font-size:15.5px;font-weight:700;margin-top:1px;white-space:nowrap}
+.stat .s{font-size:11px;color:var(--muted)}
+
+/* Listen */
+.list{overflow:hidden}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;width:100%;text-align:left;border-top:1px solid var(--hair)}
+.row:first-child{border-top:0}
+.row .l{min-width:0}
+.row .t{font-size:13px;color:var(--muted)}
+.row .m{font-size:17px;font-weight:700}
+.row .note{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .r{font-size:14.5px;font-weight:600;white-space:nowrap;text-align:right}
+.row .r small{display:block;font-size:12px;font-weight:500;color:var(--muted)}
+.more{width:100%;padding:12px;color:var(--accent);font-weight:600;border-top:1px solid var(--hair)}
+
+/* Phasen */
+.phase{padding:14px;margin-bottom:10px;width:100%;text-align:left;display:block}
+.phase .hd{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.phase .dt{font-size:13.5px;color:var(--muted)}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 6px;margin-top:10px}
+.pgrid .k{font-size:11.5px;color:var(--muted)} .pgrid .v{font-size:14.5px;font-weight:700;white-space:nowrap}
+.btn{display:block;width:100%;padding:13px;border-radius:13px;background:var(--accent);color:var(--on-accent);font-weight:700;text-align:center}
+.btn.ghost{background:var(--card2);color:var(--text)}
+.btn.danger{background:transparent;color:var(--danger)}
+.btn:disabled{opacity:.45}
+.hint{font-size:12.5px;color:var(--muted);margin:6px 4px 0}
+
+/* Einstellungen */
+.set{padding:14px}
+.set label,.field label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:6px}
+.set + .set{margin-top:10px}
+.stack{display:grid;gap:8px}
+.inline{display:flex;gap:8px}
+.inline > *{flex:1}
+
+/* Tableiste */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;padding-block:6px calc(env(safe-area-inset-bottom,0px) + 6px);padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));
+  background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--hair)}
+nav.tabs .in{max-width:600px;margin:0 auto;display:flex}
+nav.tabs button{flex:1;display:grid;justify-items:center;gap:2px;padding:6px 0;font-size:11px;font-weight:600;color:var(--muted);border-radius:12px}
+nav.tabs button.on{color:var(--accent)}
+nav.tabs svg{width:23px;height:23px}
+
+/* Dialog */
+.scrim{position:fixed;inset:0;z-index:20;background:rgba(10,10,20,.45);display:none;align-items:flex-end;justify-content:center}
+.scrim.open{display:flex}
+.sheet{background:var(--bg);width:100%;max-width:600px;border-radius:22px 22px 0 0;padding-block:18px calc(env(safe-area-inset-bottom,0px) + 18px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  max-height:92vh;overflow:auto;animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}}
+.sheet h2{margin:0 0 14px;font-size:20px}
+.field{margin-bottom:12px}
+.big{font-size:26px!important;font-weight:700;text-align:center}
+.check{display:flex;align-items:center;gap:8px;font-size:14.5px;margin-top:8px}
+.check input{width:20px;height:20px;accent-color:var(--accent)}
+.err{color:var(--danger);font-size:13.5px;min-height:19px;margin:2px 4px 8px}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 92px);transform:translateX(-50%);z-index:30;
+  background:var(--text);color:var(--bg);padding:9px 16px;border-radius:99px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;white-space:nowrap}
+.toast.show{opacity:1}
+.status{background:var(--accent-soft);color:var(--text);border-radius:12px;padding:10px 12px;font-size:13.5px;margin-bottom:12px}
+.status.error,.status.none,.status.slow{background:color-mix(in srgb,var(--warn) 18%,var(--card))}
+.row .m.none{font-size:15px;font-weight:600;color:var(--muted)}
+.row .note.wrap{white-space:normal;color:var(--text);font-size:14.5px}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+</style>
+<div class="app">
+  <header class="top">
+    <h1 id="title">Gewicht</h1>
+    <button class="add" id="addBtn" aria-label="Gewicht eintragen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+  </header>
+  <main id="view"></main>
+</div>
+
+<nav class="tabs"><div class="in" id="tabs">
+  <button data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 4-7 5 5"/><path d="M3 21h18"/></svg>Übersicht</button>
+  <button data-tab="weeks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Wochen</button>
+  <button data-tab="phases"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M4 12h16M4 17h7"/></svg>Phasen</button>
+  <button data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>Einstellungen</button>
+</div></nav>
+
+<div class="scrim" id="scrim"><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast"></div>
+<input type="file" id="file" accept=".json,.csv,.txt,.xlsx,.xls" hidden>
+
+<script>
+/* Rechenlogik des Gewichts-Trackers. Reine Funktionen ohne DOM-Zugriff,
+   damit sie im Browser (window.WT) und in Node (module.exports) pruefbar sind. */
+(function (root) {
+  'use strict';
+  const DAY = 86400000;
+  const pad = (n) => String(n).padStart(2, '0');
+
+  function toMs(iso) { const p = iso.split('-').map(Number); return Date.UTC(p[0], p[1] - 1, p[2]); }
+  function fromMs(ms) { const d = new Date(ms); return d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) + '-' + pad(d.getUTCDate()); }
+  function addDays(iso, n) { return fromMs(toMs(iso) + n * DAY); }
+  function diffDays(a, b) { return Math.round((toMs(b) - toMs(a)) / DAY); }
+  function dow(iso) { return new Date(toMs(iso)).getUTCDay(); } // 0 = Sonntag
+  function weekStart(iso) { return addDays(iso, -dow(iso)); }    // Woche: Sonntag bis Samstag
+  function todayISO(now) { const d = now || new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function isISO(s) { return typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && fromMs(toMs(s)) === s; }
+  function round(n, d) { const f = Math.pow(10, d); return Math.sign(n) * Math.round(Math.abs(n) * f + 1e-9) / f || 0; }
+  function shiftMonths(iso, n) {
+    const p = iso.split('-').map(Number);
+    const first = new Date(Date.UTC(p[0], p[1] - 1 + n, 1));
+    const last = new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + 1, 0)).getUTCDate();
+    return first.getUTCFullYear() + '-' + pad(first.getUTCMonth() + 1) + '-' + pad(Math.min(p[2], last));
+  }
+
+  /* Eingaben */
+  function parseWeight(v) {
+    let n;
+    if (typeof v === 'number') n = v;
+    else if (typeof v === 'string') {
+      const s = v.trim().toLowerCase().replace(/kg$/, '').replace(/\s/g, '').replace(',', '.');
+      if (!/^\d{1,3}(\.\d+)?$/.test(s)) return null;
+      n = parseFloat(s);
+    } else return null;
+    if (!isFinite(n) || n < 20 || n > 400) return null;
+    return round(n, 2);
+  }
+  function parseDate(v) {
+    if (typeof v === 'number') { // Excel-Seriennummer
+      if (v < 20000 || v > 80000) return null;
+      return fromMs(Date.UTC(1899, 11, 30) + Math.floor(v) * DAY);
+    }
+    if (v instanceof Date) return isNaN(v) ? null : fromMs(v.getTime() + DAY / 2);
+    if (typeof v !== 'string') return null;
+    const s = v.trim();
+    let m, y, mo, d;
+    if ((m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T ].*)?$/))) { y = +m[1]; mo = +m[2]; d = +m[3]; }
+    else if ((m = s.match(/^(?:[A-Za-zäöü]{2,10}\.?,?\s*)?(\d{1,2})[./](\d{1,2})[./](\d{4}|\d{2})$/))) {
+      d = +m[1]; mo = +m[2]; y = +m[3]; if (y < 100) y += 2000;
+    } else return null;
+    const iso = y + '-' + pad(mo) + '-' + pad(d);
+    return isISO(iso) && y >= 1990 && y <= 2100 ? iso : null;
+  }
+
+  /* Tagesliste: aufsteigend, mit Differenz zum letzten vorhandenen Eintrag */
+  function list(entries) {
+    const out = Object.keys(entries).filter((d) => entries[d].weight != null).sort()
+      .map((date) => ({ date, weight: entries[date].weight, note: entries[date].note || '' }));
+    for (let i = 0; i < out.length; i++) out[i].delta = i ? round(out[i].weight - out[i - 1].weight, 2) : null;
+    return out;
+  }
+  /* Tage ohne Gewicht (nur Notiz, "nicht gewogen"); zaehlen in keine Auswertung */
+  function noteDays(entries) {
+    return Object.keys(entries).filter((d) => entries[d].weight == null).sort().map((date) => ({ date, weight: null, note: entries[date].note || '' }));
+  }
+
+  /* Gleitender 7-Tage-Durchschnitt (Kalendertage, nur vorhandene Werte) */
+  function trend(lst) {
+    const out = []; let j = 0, sum = 0;
+    for (let i = 0; i < lst.length; i++) {
+      sum += lst[i].weight;
+      const lo = addDays(lst[i].date, -6);
+      while (lst[j].date < lo) { sum -= lst[j].weight; j++; }
+      out.push({ date: lst[i].date, value: sum / (i - j + 1) });
+    }
+    return out;
+  }
+
+  /* Wochen- und Monatsdurchschnitte. Die relative Aenderung bezieht sich auf die
+     unmittelbar vorhergehende Periode; fehlt diese, ist changePct = null. */
+  function grouped(lst, keyFn, prevKeyFn, endFn) {
+    const map = new Map();
+    for (const e of lst) {
+      const k = keyFn(e.date);
+      if (!map.has(k)) map.set(k, { start: k, end: endFn(k), sum: 0, count: 0 });
+      const g = map.get(k); g.sum += e.weight; g.count++;
+    }
+    const out = [];
+    for (const g of map.values()) {
+      const cur = { start: g.start, end: g.end, avg: g.sum / g.count, count: g.count, changePct: null, changeAbs: null };
+      const prev = out[out.length - 1];
+      if (prev && prev.start === prevKeyFn(g.start)) {
+        cur.changeAbs = cur.avg - prev.avg;
+        cur.changePct = (cur.avg - prev.avg) / prev.avg * 100;
+      }
+      out.push(cur);
+    }
+    return out;
+  }
+  function weekly(lst) { return grouped(lst, weekStart, (k) => addDays(k, -7), (k) => addDays(k, 6)); }
+  function monthly(lst) {
+    return grouped(lst, (d) => d.slice(0, 7) + '-01', (k) => shiftMonths(k, -1), (k) => addDays(shiftMonths(k, 1), -1));
+  }
+
+  /* Zeitraumfilter */
+  function rangeBounds(key, today, custom, firstDate) {
+    switch (key) {
+      case '1W': return { from: addDays(today, -6), to: today };
+      case '1M': return { from: addDays(shiftMonths(today, -1), 1), to: today };
+      case '3M': return { from: addDays(shiftMonths(today, -3), 1), to: today };
+      case '6M': return { from: addDays(shiftMonths(today, -6), 1), to: today };
+      case '1J': return { from: addDays(shiftMonths(today, -12), 1), to: today };
+      case 'CUSTOM': {
+        let f = custom && isISO(custom.from) ? custom.from : addDays(today, -29);
+        let t = custom && isISO(custom.to) ? custom.to : today;
+        if (f > t) { const x = f; f = t; t = x; }
+        return { from: f, to: t };
+      }
+      default: return { from: firstDate || today, to: today };
+    }
+  }
+
+  /* Serie aufeinanderfolgender Wiegetage (endet heute oder gestern) */
+  function streak(entries, today) {
+    const has = (x) => entries[x] && entries[x].weight != null;
+    let d = has(today) ? today : addDays(today, -1), n = 0;
+    while (has(d)) { n++; d = addDays(d, -1); }
+    return n;
+  }
+
+  /* Phasen */
+  const FAR = '9999-12-31';
+  function phaseAt(phases, date) { return phases.find((p) => p.from <= date && date <= (p.to || FAR)) || null; }
+  function phasesOverlap(a, b) { return a.from <= (b.to || FAR) && b.from <= (a.to || FAR); }
+  function mean(arr) { return arr.reduce((s, x) => s + x, 0) / arr.length; }
+  /* Start- und Endgewicht als Mittel der ersten bzw. letzten 7 Kalendertage mit Daten.
+     Umfasst die Phase weniger als 14 Tage an Daten, gelten erster und letzter Einzelwert. */
+  function phaseStats(phase, lst, today) {
+    const to = phase.to && phase.to < today ? phase.to : today;
+    const inside = lst.filter((e) => e.date >= phase.from && e.date <= to);
+    if (!inside.length) return null;
+    const first = inside[0].date, last = inside[inside.length - 1].date;
+    const span = diffDays(first, last);
+    let start, end, days;
+    if (span >= 13) {
+      const a = inside.filter((e) => e.date <= addDays(first, 6));
+      const b = inside.filter((e) => e.date >= addDays(last, -6));
+      start = mean(a.map((e) => e.weight)); end = mean(b.map((e) => e.weight));
+      days = span - 6; // Abstand der beiden Fenstermitten
+    } else { start = inside[0].weight; end = inside[inside.length - 1].weight; days = span; }
+    const change = end - start;
+    const weeks = days / 7;
+    return {
+      start, end, change, count: inside.length, days: span + 1, averaged: span >= 13,
+      changePct: change / start * 100,
+      perWeek: weeks > 0 ? change / weeks : null,
+      perWeekPct: weeks > 0 ? change / weeks / start * 100 : null,
+    };
+  }
+
+  /* Prognose des Zieldatums: lineare Regression ueber die letzten 28 Tage */
+  function forecast(lst, goal, today) {
+    if (!lst.length || goal == null) return null;
+    const lo = addDays(today, -27);
+    const pts = lst.filter((e) => e.date >= lo && e.date <= today);
+    if (pts.length < 5 || diffDays(pts[0].date, pts[pts.length - 1].date) < 13) return null;
+    const xs = pts.map((e) => diffDays(lo, e.date)), ys = pts.map((e) => e.weight);
+    const mx = mean(xs), my = mean(ys);
+    let sxy = 0, sxx = 0;
+    for (let i = 0; i < xs.length; i++) { sxy += (xs[i] - mx) * (ys[i] - my); sxx += (xs[i] - mx) * (xs[i] - mx); }
+    if (!sxx) return null;
+    const slope = sxy / sxx; // kg pro Tag
+    const tr = trend(lst); const current = tr[tr.length - 1].value;
+    const need = goal - current;
+    const res = { slopePerWeek: slope * 7, current, date: null, reached: Math.abs(need) < 0.05 };
+    if (res.reached || Math.abs(slope) < 0.002 || Math.sign(need) !== Math.sign(slope)) return res;
+    const days = Math.ceil(need / slope);
+    if (days <= 365 * 3) res.date = addDays(today, days);
+    return res;
+  }
+
+  /* Import: CSV zerlegen und Spalten (Datum, Gewicht, Notiz) erkennen */
+  function parseCSV(text) {
+    text = text.replace(/^﻿/, '');
+    const head = text.split(/\r?\n/, 5).join('\n');
+    const cnt = (ch) => head.split(ch).length - 1;
+    const delim = cnt(';') ? ';' : cnt('\t') ? '\t' : ',';
+    const rows = []; let row = [], cell = '', q = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (q) {
+        if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+        else cell += c;
+      } else if (c === '"') q = true;
+      else if (c === delim) { row.push(cell); cell = ''; }
+      else if (c === '\n' || c === '\r') {
+        if (c === '\r' && text[i + 1] === '\n') i++;
+        row.push(cell); rows.push(row); row = []; cell = '';
+      } else cell += c;
+    }
+    if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+    return rows;
+  }
+  const PHASE_NAMES = { 'diät': 'Diät', 'diaet': 'Diät', 'diat': 'Diät', 'aufbau': 'Aufbau', 'erhalt': 'Erhalt' };
+  /* Spalten werden vorrangig ueber die Kopfzeile bestimmt (Datum, Gewicht, Kommentar/Notiz, Phase),
+     ersatzweise ueber die Haeufigkeit passender Werte. Tage ohne Gewicht, aber mit Kommentar oder dem
+     Vermerk "nicht gewogen", werden als Notiz-Tage (weight = null) uebernommen. */
+  function rowsToEntries(rows) {
+    const width = rows.reduce((m, r) => Math.max(m, r.length), 0);
+    let dateCol = -1, weightCol = -1, noteCol = -1, phaseCol = -1;
+    for (let i = 0; i < Math.min(5, rows.length) && dateCol < 0; i++) {
+      const r = rows[i].map((v) => (typeof v === 'string' ? v.trim().toLowerCase() : ''));
+      const d = r.findIndex((v) => /^(datum|date|tag)\b/.test(v));
+      if (d < 0) continue;
+      dateCol = d;
+      weightCol = r.findIndex((v, c) => c !== d && /gewicht|weight|^kg$/.test(v) && !/hilfs|ø|schnitt|diff|änderung|aenderung/.test(v));
+      noteCol = r.findIndex((v) => /kommentar|notiz|bemerkung|anmerkung|^note|comment/.test(v));
+      phaseCol = r.findIndex((v) => /^phase/.test(v));
+    }
+    const dc = new Array(width).fill(0), wc = new Array(width).fill(0), tc = new Array(width).fill(0);
+    for (const r of rows) for (let c = 0; c < r.length; c++) {
+      const v = r[c];
+      if (v == null || v === '') continue;
+      if (parseDate(v)) dc[c]++;
+      else if (parseWeight(v) != null) wc[c]++;
+      else if (typeof v === 'string' && v.trim() && !/^[-+]?[\d.,\s%]+$/.test(v.trim())) tc[c]++;
+    }
+    const argmax = (a, skip) => { let b = -1; for (let i = 0; i < a.length; i++) if (!skip.includes(i) && a[i] > 0 && (b < 0 || a[i] > a[b])) b = i; return b; };
+    if (dateCol < 0) dateCol = argmax(dc, []);
+    if (weightCol < 0) weightCol = argmax(wc, [dateCol]);
+    const empty = { entries: [], phaseDays: {}, skipped: rows.length, duplicates: 0, dateCol, weightCol, noteCol: -1, phaseCol: -1 };
+    if (dateCol < 0 || weightCol < 0) return empty;
+    if (noteCol < 0) {
+      // Kopfzeilen zaehlen als Text; eine Notizspalte braucht daher mehr als einen Texteintrag
+      noteCol = argmax(tc, [dateCol, weightCol, phaseCol]);
+      if (noteCol >= 0 && tc[noteCol] < 2) noteCol = -1;
+    }
+    const map = new Map(), phaseDays = {}; let skipped = 0, duplicates = 0;
+    for (const r of rows) {
+      const date = parseDate(r[dateCol]);
+      if (!date) { if (r.some((v) => v != null && v !== '')) skipped++; continue; }
+      if (phaseCol >= 0 && typeof r[phaseCol] === 'string') { const t = PHASE_NAMES[r[phaseCol].trim().toLowerCase()]; if (t) phaseDays[date] = t; }
+      const weight = parseWeight(r[weightCol]);
+      const noteRaw = noteCol >= 0 ? r[noteCol] : '';
+      const note = noteRaw == null ? '' : String(noteRaw).replace(/\s*\n\s*/g, ' ').trim().slice(0, 300);
+      const rawW = r[weightCol];
+      const marked = typeof rawW === 'string' && /nicht|n\.\s?a\.?|^-+$/i.test(rawW.trim());
+      if (weight == null && !note && !marked) continue; // leerer Tag
+      if (map.has(date)) duplicates++;
+      map.set(date, { date, weight, note });
+    }
+    return { entries: [...map.values()].sort((a, b) => (a.date < b.date ? -1 : 1)), phaseDays, skipped, duplicates, dateCol, weightCol, noteCol, phaseCol };
+  }
+  /* Tageweise Phasenangaben zu Zeitraeumen zusammenfassen */
+  function phaseSegments(phaseDays) {
+    const out = []; let cur = null;
+    for (const d of Object.keys(phaseDays).sort()) {
+      if (cur && cur.type === phaseDays[d] && addDays(cur.to, 1) === d) cur.to = d;
+      else { cur = { type: phaseDays[d], from: d, to: d }; out.push(cur); }
+    }
+    return out;
+  }
+
+  const api = {
+    DAY, toMs, fromMs, addDays, diffDays, dow, weekStart, todayISO, isISO, round, shiftMonths,
+    parseWeight, parseDate, list, noteDays, trend, weekly, monthly, rangeBounds, streak,
+    phaseAt, phasesOverlap, phaseStats, forecast, parseCSV, rowsToEntries, phaseSegments,
+  };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.WT = api;
+})(typeof self !== 'undefined' ? self : this);
+
+</script>
+<script>
+/* Oberflaeche des Gewichts-Trackers. Rechenlogik siehe logic.js (window.WT). */
+(function () {
+  'use strict';
+  const L = window.WT;
+  const KEY = 'gewichtstracker.v1';
+  const $ = (s, el) => (el || document).querySelector(s);
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const WD = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+  const MON = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+  const MONL = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+  const TYPES = ['Diät', 'Aufbau', 'Erhalt'];
+  const PCOL = { 'Diät': 'var(--p-diaet)', 'Aufbau': 'var(--p-aufbau)', 'Erhalt': 'var(--p-erhalt)' };
+
+  /* Formatierung (deutsch) */
+  const num = (n, d = 2) => Math.abs(L.round(n, d)).toFixed(d).replace('.', ',').replace(/^/, L.round(n, d) < 0 ? '-' : '');
+  const signed = (n, d = 2) => { const r = L.round(n, d); return (r > 0 ? '+' : r < 0 ? '-' : '±') + Math.abs(r).toFixed(d).replace('.', ','); };
+  const dDate = (iso) => iso.slice(8) + '.' + iso.slice(5, 7) + '.' + iso.slice(0, 4);
+  const dShort = (iso) => iso.slice(8) + '.' + iso.slice(5, 7) + '.';
+  const dLong = (iso) => WD[L.dow(iso)] + '., ' + dDate(iso);
+
+  /* Zustand
+     S = Daten (liegen in der Artifact-Datenbank), P = Anzeigevorlieben dieses Geraets (localStorage). */
+  /* Zwei Betriebsarten aus einer Codebasis:
+     Artifact: Daten in der Artifact-Datenbank, localStorage nur als Zwischenspeicher.
+     Lokal (GitHub Pages, offline): Daten ausschliesslich in localStorage dieses Geraets (window.WT_MODE = 'local'). */
+  const LOCAL = window.WT_MODE === 'local';
+  const CACHE = LOCAL ? 'gewichtstracker.data.v1' : 'gewichtstracker.cache.v2', PREFS = 'gewichtstracker.prefs.v1';
+  const blank = () => ({ entries: {}, phases: [], settings: { goal: null } });
+  let S = blank();
+  let P = { theme: 'system', range: '1M', custom: null };
+  const UI = { tab: 'home', mode: 'w', limit: 60, sel: null };
+  let C = {}; // abgeleitete Werte je Render
+  const lsGet = (k) => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
+  const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } };
+  const storePrefs = () => lsSet(PREFS, P);
+  const cleanPhases = (arr) => (Array.isArray(arr) ? arr : [])
+    .filter((p) => p && TYPES.includes(p.type) && L.isISO(p.from) && (!p.to || L.isISO(p.to)))
+    .map((p, i) => ({ id: String(p.id || 'p' + i), type: p.type, from: p.from, to: p.to || null }));
+
+  /* Speicherschicht: Dokumente tracker/meta (Phasen, Ziel) und tracker/y<Jahr> (alle Tage eines Jahres).
+     status: loading | ready | slow (Datenbank antwortet nicht) | none (nicht verfuegbar) | error */
+  const Store = { db: null, status: 'loading', pending: {}, chain: {}, busy: 0, deferred: null, timer: null, needRender: false };
+  const yearKey = (date) => 'y' + date.slice(0, 4);
+  function bodyOf(key) {
+    if (key === 'meta') return { v: 1, phases: S.phases, settings: { goal: S.settings.goal } };
+    const y = key.slice(1), days = {};
+    for (const d in S.entries) if (d.slice(0, 4) === y) days[d] = { w: S.entries[d].weight, n: S.entries[d].note || '' };
+    return { v: 1, days };
+  }
+  function persist(keys) {
+    if (LOCAL) {
+      if (!lsSet(CACHE, S)) { toast('Speichern fehlgeschlagen: Gerätespeicher voll oder gesperrt'); setStatus('localerror'); }
+      return;
+    }
+    lsSet(CACHE, S);
+    if (!Store.db) return;
+    for (const key of new Set(keys)) {
+      if (Store.pending[key]) continue; // bereits eingereiht; der Inhalt wird erst beim Schreiben gebildet
+      Store.pending[key] = true; Store.busy++;
+      Store.chain[key] = (Store.chain[key] || Promise.resolve()).then(async () => {
+        Store.pending[key] = false;
+        const ref = Store.db.doc('tracker/' + key), body = bodyOf(key);
+        try { await ref.set(body); }
+        catch (e) {
+          if (!e || e.code !== 'unavailable') throw e;
+          await new Promise((r) => setTimeout(r, 700 + Math.random() * 600));
+          await ref.set(body);
+        }
+      }).catch(() => { setStatus('error'); toast('Speichern fehlgeschlagen'); })
+        .finally(() => {
+          Store.busy--;
+          if (!Store.busy && Store.deferred && !Store.deferred.metadata.hasPendingWrites) { const d = Store.deferred; Store.deferred = null; applySnapshot(d); }
+        });
+    }
+  }
+  function applySnapshot(snap) {
+    if (Store.busy || snap.metadata.hasPendingWrites) { Store.deferred = snap; return; }
+    const entries = {}; let meta = null;
+    for (const doc of snap.docs) {
+      const b = doc.data() || {};
+      if (doc.id === 'meta') meta = b;
+      else if (/^y\d{4}$/.test(doc.id) && b.days && typeof b.days === 'object') {
+        for (const d in b.days) {
+          if (!L.isISO(d) || !b.days[d]) continue;
+          entries[d] = { weight: b.days[d].w == null ? null : L.parseWeight(b.days[d].w), note: String(b.days[d].n || '') };
+        }
+      }
+    }
+    S = { entries, phases: cleanPhases(meta && meta.phases), settings: { goal: meta && meta.settings ? L.parseWeight(meta.settings.goal) : null } };
+    lsSet(CACHE, S);
+    if (!snap.metadata.fromCache) { clearTimeout(Store.timer); Store.status = 'ready'; }
+    if ($('#scrim').classList.contains('open')) Store.needRender = true; else render();
+  }
+  function setStatus(st) { Store.status = st; if ($('#scrim').classList.contains('open')) Store.needRender = true; else render(); }
+  async function initStore() {
+    if (LOCAL) {
+      Store.status = 'ready'; render();
+      if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+      if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => {});
+      return;
+    }
+    let db = null;
+    try { if (window.claude && window.claude.use) db = await window.claude.use('db'); } catch (e) { db = null; }
+    if (!db) return setStatus('none');
+    Store.db = db;
+    Store.timer = setTimeout(() => { if (Store.status === 'loading') setStatus('slow'); }, 10000);
+    db.collection('tracker').onSnapshot(applySnapshot, (e) => { clearTimeout(Store.timer); setStatus(e && e.code === 'revoked' ? 'none' : 'error'); });
+  }
+  const STATUS_TEXT = {
+    loading: 'Daten werden geladen …',
+    slow: 'Die Datenbank antwortet noch nicht. Angezeigt wird der zuletzt auf diesem Gerät gesehene Stand; Eingaben sind bis zur Verbindung gesperrt.',
+    none: 'In dieser Ansicht besteht keine Verbindung zur Datenbank. Angezeigt wird der zuletzt auf diesem Gerät gesehene Stand; Eingaben sind gesperrt.',
+    error: 'Die Verbindung zur Datenbank ist gestört. Bitte die Seite neu laden; Eingaben sind bis dahin gesperrt.',
+    localerror: 'Der letzte Eintrag konnte nicht auf dem Gerät gespeichert werden. Bitte sofort ein Backup speichern und die App neu öffnen.',
+  };
+  function writable() {
+    if (Store.status === 'ready') return true;
+    toast(Store.status === 'loading' ? 'Daten werden noch geladen' : 'Keine Verbindung zur Datenbank');
+    return false;
+  }
+  function derive() {
+    const today = L.todayISO();
+    const lst = L.list(S.entries);
+    C = { today, lst, notes: L.noteDays(S.entries), tr: L.trend(lst), latest: lst[lst.length - 1] || null };
+  }
+
+  /* Bewertung einer Veraenderung: richtet sich nach Phase, ersatzweise nach dem Ziel */
+  function dirAt(date) {
+    const p = L.phaseAt(S.phases, date);
+    if (p) return p.type === 'Diät' ? -1 : p.type === 'Aufbau' ? 1 : 0;
+    if (S.settings.goal != null && C.latest) { const n = S.settings.goal - C.latest.weight; return Math.abs(n) > 0.05 ? Math.sign(n) : 0; }
+    return 0;
+  }
+  function cls(delta, date) {
+    const d = dirAt(date);
+    if (!d || delta == null || Math.abs(delta) < 1e-9) return 'muted';
+    return delta * d > 0 ? 'good' : 'warn';
+  }
+  function bounds() {
+    return L.rangeBounds(P.range, C.today, P.custom, C.lst.length ? C.lst[0].date : C.today);
+  }
+
+  /* Render */
+  const TITLES = { home: 'Gewicht', weeks: 'Durchschnitte', phases: 'Phasen', settings: 'Einstellungen' };
+  function render() {
+    derive();
+    $('#title').textContent = TITLES[UI.tab];
+    document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('on', b.dataset.tab === UI.tab));
+    const v = $('#view');
+    const st = STATUS_TEXT[Store.status];
+    v.innerHTML = (st ? `<div class="status ${Store.status}" role="status">${st}</div>` : '') + (UI.tab === 'home' ? backupNote() : '') + ({ home: viewHome, weeks: viewWeeks, phases: viewPhases, settings: viewSettings })[UI.tab]();
+    if (UI.tab === 'home') drawChart();
+    if (UI.tab === 'settings' && LOCAL) offlineCheck();
+  }
+
+  /* Lokaler Modus: Erinnerung, wenn das letzte Backup laenger als 30 Tage zurueckliegt */
+  function backupNote() {
+    if (!LOCAL || !C.lst.length) return '';
+    const last = P.lastBackup && L.isISO(P.lastBackup) ? P.lastBackup : null;
+    const age = last ? L.diffDays(last, C.today) : null;
+    if (age != null && age <= 30) return '';
+    return `<button class="status slow" data-act="tab" data-tab="settings" style="display:block;width:100%;text-align:left">${last ? 'Letztes Backup vor ' + age + ' Tagen.' : 'Noch kein Backup gespeichert.'} Deine Daten liegen nur auf diesem iPhone. Antippen, um ein Backup zu speichern.</button>`;
+  }
+
+  function heroTiles() {
+    const t = [];
+    const la = C.latest;
+    if (la) {
+      const prev = C.lst[C.lst.length - 2];
+      const ref = prev ? (prev.date === L.addDays(la.date, -1) ? 'zum Vortag' : 'zum ' + dShort(prev.date)) : '';
+      t.push(`<button class="card tile" data-act="entry" data-date="${la.date}"><div class="k">${la.date === C.today ? 'Heute' : 'Zuletzt, ' + dShort(la.date)}</div>
+        <div class="v num">${num(la.weight)} <small>kg</small></div>
+        <div class="s num ${cls(la.delta, la.date)}">${la.delta == null ? '<span class="muted">Erster Eintrag</span>' : signed(la.delta) + ' kg ' + ref}</div></button>`);
+    } else {
+      t.push(`<button class="card tile" data-act="entry"><div class="k">Heute</div><div class="v">Kein Eintrag</div><div class="s muted">Gewicht eintragen</div></button>`);
+    }
+    const weeks = L.weekly(C.lst), w = weeks[weeks.length - 1];
+    if (w) {
+      const running = w.start === L.weekStart(C.today);
+      t.push(`<button class="card tile" data-act="tab" data-tab="weeks"><div class="k">${running ? 'Wochenschnitt (laufend)' : 'Letzter Wochenschnitt'}</div>
+        <div class="v num">${num(w.avg)} <small>kg</small></div>
+        <div class="s num ${cls(w.changeAbs, w.end > C.today ? C.today : w.end)}">${w.changePct == null ? '<span class="muted">Vorwoche ohne Daten</span>' : signed(w.changePct, 3) + ' % zur Vorwoche'}</div></button>`);
+    } else {
+      t.push(`<button class="card tile" data-act="tab" data-tab="weeks"><div class="k">Wochenschnitt</div><div class="v">k. A.</div><div class="s muted">Noch keine Daten</div></button>`);
+    }
+    const ph = L.phaseAt(S.phases, C.today);
+    t.push(`<button class="card tile" data-act="tab" data-tab="phases"><div class="k">Aktuelle Phase</div>
+      <div class="v">${ph ? `<span class="badge b-${ph.type}">${ph.type}</span>` : 'Keine'}</div>
+      <div class="s muted">${ph ? 'seit ' + dDate(ph.from) : 'Phase festlegen'}</div></button>`);
+    const goal = S.settings.goal;
+    if (goal != null && la) {
+      const need = goal - la.weight, fc = L.forecast(C.lst, goal, C.today);
+      const reached = Math.abs(need) < 0.05;
+      t.push(`<button class="card tile" data-act="tab" data-tab="settings"><div class="k">Bis zum Ziel (${num(goal)} kg)</div>
+        <div class="v num">${reached ? 'Erreicht' : signed(need) + ' <small>kg</small>'}</div>
+        <div class="s muted">${fc && fc.date && !reached ? 'Prognose: ' + dDate(fc.date) : fc && !reached ? 'Trend ' + signed(fc.slopePerWeek) + ' kg/Woche' : 'Prognose noch nicht möglich'}</div></button>`);
+    } else {
+      t.push(`<button class="card tile" data-act="tab" data-tab="settings"><div class="k">Zielgewicht</div><div class="v">${goal != null ? num(goal) + ' <small>kg</small>' : 'Kein Ziel'}</div><div class="s muted">${goal != null ? '' : 'Ziel festlegen'}</div></button>`);
+    }
+    return `<div class="hero">${t.join('')}</div>`;
+  }
+
+  const RANGES = [['1W', '1W'], ['1M', '1M'], ['3M', '3M'], ['6M', '6M'], ['1J', '1J'], ['ALL', 'Alle'], ['CUSTOM', 'Datum']];
+  function viewHome() {
+    const b = bounds();
+    const pts = C.lst.filter((e) => e.date >= b.from && e.date <= b.to);
+    const r = P.range;
+    let h = heroTiles();
+    h += `<div class="section-title">Verlauf</div>
+      <div class="seg">${RANGES.map(([k, l]) => `<button data-act="range" data-range="${k}" class="${k === r ? 'on' : ''}">${l}</button>`).join('')}</div>`;
+    if (r === 'CUSTOM') {
+      h += `<div class="custom"><input type="date" id="cFrom" value="${b.from}" max="${C.today}" aria-label="Von"><span class="muted">bis</span><input type="date" id="cTo" value="${b.to}" max="${C.today}" aria-label="Bis"></div>`;
+    }
+    h += `<div class="card chartcard"><div class="readout" id="readout"></div><div id="chart"></div><div class="legend" id="legend"></div></div>`;
+
+    if (pts.length) {
+      const first = pts[0], last = pts[pts.length - 1];
+      let mn = first, mx = first, sum = 0;
+      for (const e of pts) { sum += e.weight; if (e.weight < mn.weight) mn = e; if (e.weight > mx.weight) mx = e; }
+      const ch = last.weight - first.weight;
+      const days = L.diffDays(b.from < C.lst[0].date ? C.lst[0].date : b.from, b.to) + 1;
+      const st = L.streak(S.entries, C.today);
+      h += `<div class="stats">
+        <div class="card stat"><div class="k">Veränderung</div><div class="v num ${cls(ch, last.date)}">${pts.length > 1 ? signed(ch) + ' kg' : 'k. A.'}</div><div class="s num">${pts.length > 1 ? signed(ch / first.weight * 100, 2) + ' %' : ''}</div></div>
+        <div class="card stat"><div class="k">Durchschnitt</div><div class="v num">${num(sum / pts.length)} kg</div><div class="s">im Zeitraum</div></div>
+        <div class="card stat"><div class="k">Einträge</div><div class="v num">${pts.length}</div><div class="s num">an ${days} ${days === 1 ? 'Tag' : 'Tagen'}</div></div>
+        <div class="card stat"><div class="k">Tiefstwert</div><div class="v num">${num(mn.weight)} kg</div><div class="s num">${dDate(mn.date)}</div></div>
+        <div class="card stat"><div class="k">Höchstwert</div><div class="v num">${num(mx.weight)} kg</div><div class="s num">${dDate(mx.date)}</div></div>
+        <div class="card stat"><div class="k">Serie</div><div class="v num">${st} ${st === 1 ? 'Tag' : 'Tage'}</div><div class="s">in Folge gewogen</div></div>
+      </div>`;
+    }
+
+    const planned = C.notes.filter((e) => e.date > C.today);
+    if (planned.length) {
+      h += `<div class="section-title">Vorgemerkt</div><div class="card list">${planned.map((e) => `<button class="row" data-act="entry" data-date="${e.date}">
+        <span class="l"><span class="t">${dLong(e.date)}</span><div class="note wrap">${esc(e.note) || 'Notiz'}</div></span></button>`).join('')}</div>`;
+    }
+    const rowsAll = pts.concat(C.notes.filter((e) => e.date >= b.from && e.date <= b.to)).sort((x, y) => (x.date < y.date ? 1 : -1));
+    h += `<div class="section-title">Einträge${pts.length ? ' (' + pts.length + ')' : ''}</div>`;
+    if (!rowsAll.length) {
+      h += `<div class="card empty">${Store.status === 'loading' ? 'Daten werden geladen …' : C.lst.length ? 'Im gewählten Zeitraum liegen keine Einträge vor.' : 'Noch keine Einträge. Über das Plus oben rechts trägst du dein erstes Gewicht ein; vorhandene Listen lassen sich in den Einstellungen importieren.'}</div>`;
+    } else {
+      const rows = rowsAll.slice(0, UI.limit).map((e) => (e.weight == null
+        ? `<button class="row" data-act="entry" data-date="${e.date}"><span class="l"><span class="t">${dLong(e.date)}</span><div class="m none">nicht gewogen</div>${e.note ? `<div class="note">${esc(e.note)}</div>` : ''}</span></button>`
+        : `<button class="row" data-act="entry" data-date="${e.date}">
+        <span class="l"><span class="t">${dLong(e.date)}</span><div class="m num">${num(e.weight)} kg</div>${e.note ? `<div class="note">${esc(e.note)}</div>` : ''}</span>
+        <span class="r num ${cls(e.delta, e.date)}">${e.delta == null ? '' : signed(e.delta) + ' kg'}</span></button>`)).join('');
+      h += `<div class="card list">${rows}${rowsAll.length > UI.limit ? `<button class="more" data-act="more">Weitere anzeigen</button>` : ''}</div>`;
+    }
+    return h;
+  }
+
+  /* Diagramm (SVG) */
+  function xTicks(from, to) {
+    const span = L.diffDays(from, to), out = [];
+    if (span <= 10) {
+      const step = span <= 7 ? 1 : 2;
+      for (let d = from; d <= to; d = L.addDays(d, step)) out.push({ d, label: dShort(d) });
+    } else if (span <= 70) {
+      const step = span <= 35 ? 7 : 14;
+      let d = L.weekStart(from); if (d < from) d = L.addDays(d, 7);
+      for (; d <= to; d = L.addDays(d, step)) out.push({ d, label: dShort(d) });
+    } else {
+      const firsts = [];
+      let d = from.slice(0, 7) + '-01'; if (d < from) d = L.shiftMonths(d, 1);
+      for (; d <= to; d = L.shiftMonths(d, 1)) firsts.push(d);
+      const k = Math.max(1, Math.ceil(firsts.length / 5));
+      firsts.forEach((f, i) => {
+        if (i % k) return;
+        const m = +f.slice(5, 7) - 1;
+        out.push({ d: f, label: MON[m] + (m === 0 || !out.length ? ' ' + f.slice(2, 4) : '') });
+      });
+    }
+    return out;
+  }
+  function drawChart() {
+    const box = $('#chart'); if (!box) return;
+    const b = bounds();
+    const pts = C.lst.filter((e) => e.date >= b.from && e.date <= b.to);
+    const ro = $('#readout'), lg = $('#legend');
+    if (!pts.length) { box.innerHTML = '<div class="empty">Keine Daten im gewählten Zeitraum.</div>'; ro.innerHTML = ''; lg.innerHTML = ''; return; }
+    const tp = C.tr.filter((e) => e.date >= b.from && e.date <= b.to);
+    const W = Math.max(260, box.clientWidth), H = Math.round(Math.min(270, Math.max(190, W * 0.58)));
+    const m = { l: 4, r: 38, t: 12, b: 22 };
+    const from = pts[0].date > b.from ? pts[0].date : b.from;
+    const x0 = L.toMs(from); let x1 = L.toMs(b.to); if (x1 <= x0) x1 = x0 + L.DAY;
+    let lo = Infinity, hi = -Infinity;
+    for (const e of pts) { lo = Math.min(lo, e.weight); hi = Math.max(hi, e.weight); }
+    const goal = S.settings.goal, reach = Math.max(1.5, hi - lo);
+    const showGoal = goal != null && goal >= lo - reach && goal <= hi + reach;
+    if (showGoal) { lo = Math.min(lo, goal); hi = Math.max(hi, goal); }
+    const padY = Math.max(0.25, (hi - lo) * 0.12); lo -= padY; hi += padY;
+    const step = [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50].find((s) => (hi - lo) / s <= 5) || 100;
+    const X = (ms) => m.l + (ms - x0) / (x1 - x0) * (W - m.l - m.r);
+    const Y = (v) => m.t + (hi - v) / (hi - lo) * (H - m.t - m.b);
+    const f = (n) => n.toFixed(1);
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gewichtsverlauf">`;
+
+    // Phasen
+    const used = new Set();
+    for (const p of S.phases) {
+      const a = p.from > from ? p.from : from, e = (p.to || b.to) < b.to ? p.to : b.to;
+      if (a > e) continue;
+      used.add(p.type);
+      const xa = X(L.toMs(a)), xb = Math.max(xa + 2, X(L.toMs(e)));
+      s += `<rect x="${f(xa)}" y="${m.t}" width="${f(xb - xa)}" height="${H - m.t - m.b}" fill="${PCOL[p.type]}" opacity=".13"/>`;
+      s += `<rect x="${f(xa)}" y="${m.t}" width="${f(xb - xa)}" height="3" fill="${PCOL[p.type]}" opacity=".85"/>`;
+    }
+    // Raster
+    for (let v = Math.ceil(lo / step - 1e-9) * step; v <= hi + 1e-9; v += step) {
+      s += `<line x1="${m.l}" x2="${W - m.r}" y1="${f(Y(v))}" y2="${f(Y(v))}" stroke="var(--hair)"/>`;
+      s += `<text x="${W - m.r + 6}" y="${f(Y(v) + 3.5)}">${v.toFixed(step < 1 ? 1 : 0).replace('.', ',')}</text>`;
+    }
+    for (const t of xTicks(from, b.to)) {
+      const x = X(L.toMs(t.d));
+      s += `<line x1="${f(x)}" x2="${f(x)}" y1="${m.t}" y2="${H - m.b}" stroke="var(--hair)" stroke-dasharray="2 3"/>`;
+      s += `<text x="${f(Math.min(x, W - m.r - 14))}" y="${H - 6}" text-anchor="middle">${t.label}</text>`;
+    }
+    if (showGoal) {
+      s += `<line x1="${m.l}" x2="${W - m.r}" y1="${f(Y(goal))}" y2="${f(Y(goal))}" stroke="var(--good)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+    }
+    const path = (arr, val) => arr.map((e, i) => (i ? 'L' : 'M') + f(X(L.toMs(e.date))) + ' ' + f(Y(val(e)))).join('');
+    if (tp.length > 1) s += `<path d="${path(tp, (e) => e.value)}" fill="none" stroke="var(--accent)" stroke-opacity=".28" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>`;
+    s += `<path d="${path(pts, (e) => e.weight)}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+    const dots = pts.length <= 70;
+    let hasNote = false;
+    for (const e of pts) {
+      const cx = f(X(L.toMs(e.date))), cy = f(Y(e.weight));
+      if (dots || pts.length === 1) s += `<circle cx="${cx}" cy="${cy}" r="2.7" fill="var(--accent)"/>`;
+      if (e.note && pts.length <= 200) { hasNote = true; s += `<circle cx="${cx}" cy="${cy}" r="5" fill="none" stroke="var(--warn)" stroke-width="1.6"/>`; }
+    }
+    s += `<g id="cur"><line id="curL" y1="${m.t}" y2="${H - m.b}" stroke="var(--muted)" stroke-width="1"/><circle id="curC" r="5" fill="var(--accent)" stroke="var(--card)" stroke-width="2"/></g></svg>`;
+    box.innerHTML = s;
+
+    lg.innerHTML = `<span><i style="background:var(--accent)"></i>Tageswert</span><span><i style="background:var(--accent);opacity:.35;height:5px"></i>7-Tage-Schnitt</span>`
+      + (showGoal ? `<span><i style="background:var(--good)"></i>Ziel</span>` : '')
+      + (hasNote ? `<span><i class="sq" style="background:none;border:1.6px solid var(--warn);border-radius:50%;opacity:1"></i>Notiz</span>` : '')
+      + TYPES.filter((t) => used.has(t)).map((t) => `<span><i class="sq" style="background:${PCOL[t]}"></i>${t}</span>`).join('');
+
+    const select = (e) => {
+      UI.sel = e.date;
+      const x = f(X(L.toMs(e.date)));
+      $('#curL').setAttribute('x1', x); $('#curL').setAttribute('x2', x);
+      $('#curC').setAttribute('cx', x); $('#curC').setAttribute('cy', f(Y(e.weight)));
+      ro.innerHTML = `<span class="d">${dLong(e.date)}<span class="n">${e.note ? esc(e.note) : e.delta == null ? '' : signed(e.delta) + ' kg zum letzten Eintrag'}</span></span><span class="w num">${num(e.weight)} kg</span>`;
+    };
+    const pick = (ev) => {
+      const r = box.firstChild.getBoundingClientRect();
+      const px = (ev.clientX - r.left) * (W / r.width);
+      let best = pts[0], bd = Infinity;
+      for (const e of pts) { const d = Math.abs(X(L.toMs(e.date)) - px); if (d < bd) { bd = d; best = e; } }
+      select(best);
+    };
+    box.onpointerdown = pick;
+    box.onpointermove = (ev) => { if (ev.pointerType === 'mouse' ? true : ev.pressure > 0 || ev.buttons) pick(ev); };
+    select(pts.find((e) => e.date === UI.sel) || pts[pts.length - 1]);
+  }
+
+  function viewWeeks() {
+    const isW = UI.mode === 'w';
+    const groups = (isW ? L.weekly(C.lst) : L.monthly(C.lst)).reverse();
+    let h = `<div class="seg"><button data-act="mode" data-mode="w" class="${isW ? 'on' : ''}">Wochen</button><button data-act="mode" data-mode="m" class="${isW ? '' : 'on'}">Monate</button></div>
+      <p class="hint">${isW ? 'Wochendurchschnitt der vorhandenen Tageswerte von Sonntag bis Samstag; relative Änderung zur unmittelbaren Vorwoche.' : 'Monatsdurchschnitt der vorhandenen Tageswerte; relative Änderung zum unmittelbaren Vormonat.'}</p>`;
+    if (!groups.length) return h + `<div class="card empty" style="margin-top:12px">Noch keine Daten vorhanden.</div>`;
+    h += `<div class="card list" style="margin-top:12px">` + groups.map((g) => {
+      const running = g.end >= C.today && g.start <= C.today;
+      const label = isW
+        ? `${WD[0]} ${dShort(g.start)} bis ${WD[6]} ${dDate(g.end)}`
+        : `${MONL[+g.start.slice(5, 7) - 1]} ${g.start.slice(0, 4)}`;
+      return `<div class="row"><span class="l"><span class="t">${label}${running ? ' (laufend)' : ''}</span>
+        <div class="m num">${num(g.avg)} kg</div><div class="note">${g.count} ${g.count === 1 ? 'Messung' : 'Messungen'}</div></span>
+        <span class="r num ${cls(g.changeAbs, running ? C.today : g.end)}">${g.changePct == null ? '<span class="muted">k. A.</span>' : signed(g.changePct, 3) + ' %<small>' + signed(g.changeAbs) + ' kg</small>'}</span></div>`;
+    }).join('') + `</div>`;
+    return h;
+  }
+
+  function viewPhases() {
+    let h = `<button class="btn" data-act="phase">Phase hinzufügen</button>
+      <p class="hint" style="margin-bottom:14px">Phasen werden im Diagramm farbig hinterlegt und bestimmen, ob eine Zu- oder Abnahme grün (zielkonform) dargestellt wird.</p>`;
+    const ps = S.phases.slice().sort((a, b) => (a.from < b.from ? 1 : -1));
+    if (!ps.length) return h + `<div class="card empty">Noch keine Phase angelegt.</div>`;
+    for (const p of ps) {
+      const st = L.phaseStats(p, C.lst, C.today);
+      const future = p.from > C.today;
+      h += `<button class="card phase" data-act="phase" data-id="${p.id}"><div class="hd"><span class="badge b-${p.type}">${p.type}</span>
+        <span class="dt num">${dDate(p.from)} bis ${p.to ? dDate(p.to) : 'heute (laufend)'}</span></div>`;
+      if (st) {
+        const d = p.type === 'Diät' ? -1 : p.type === 'Aufbau' ? 1 : 0;
+        const c = !d || Math.abs(st.change) < 0.005 ? '' : st.change * d > 0 ? 'good' : 'warn';
+        h += `<div class="pgrid">
+          <div><div class="k">Start</div><div class="v num">${num(st.start)} kg</div></div>
+          <div><div class="k">${p.to && p.to < C.today ? 'Ende' : 'Aktuell'}</div><div class="v num">${num(st.end)} kg</div></div>
+          <div><div class="k">Veränderung</div><div class="v num ${c}">${signed(st.change)} kg</div></div>
+          <div><div class="k">Pro Woche</div><div class="v num">${st.perWeek == null ? 'k. A.' : signed(st.perWeek) + ' kg'}</div></div>
+          <div><div class="k">Pro Woche</div><div class="v num">${st.perWeekPct == null ? 'k. A.' : signed(st.perWeekPct, 3) + ' %'}</div></div>
+          <div><div class="k">Messungen</div><div class="v num">${st.count}</div></div>
+        </div><p class="hint" style="margin-left:0">${st.averaged ? 'Start und Ende als Mittel der ersten bzw. letzten 7 Tage der Phase.' : 'Weniger als 14 Tage Daten: Start und Ende sind Einzelwerte.'}</p>`;
+      } else {
+        h += `<p class="hint" style="margin-left:0">${future ? 'Phase beginnt in der Zukunft.' : 'Keine Einträge in diesem Zeitraum.'}</p>`;
+      }
+      h += `</button>`;
+    }
+    return h;
+  }
+
+  /* Lokaler Modus: Selbstpruefung, ob die App offline startet */
+  const OFFLINE_FILES = { 'manifest.webmanifest': 'App-Beschreibung', 'xlsx.mini.min.js': 'Excel-Modul (Import und Export offline)', 'apple-touch-icon.png': 'App-Symbol' };
+  async function offlineCheck() {
+    const el = $('#offState'); if (!el) return;
+    const show = (cls, head, text) => { if (el.isConnected) el.innerHTML = `<b class="${cls}">${head}</b><br>${text}`; };
+    try {
+      if (!('serviceWorker' in navigator) || !window.caches) return show('warn', 'Nicht verfügbar', 'Dieser Browser unterstützt keinen Offline-Speicher.');
+      const reg = await navigator.serviceWorker.getRegistration();
+      if (!reg) return show('warn', 'Nicht eingerichtet', 'Bitte die App mit Internetverbindung schließen und erneut öffnen.');
+      if (!reg.active) return show('muted', 'Wird eingerichtet …', 'Bitte einen Moment warten und die Einstellungen erneut öffnen.');
+      const core = await caches.match('./', { ignoreSearch: true });
+      if (!core) return show('warn', 'Nicht bereit', 'Die App ist noch nicht zwischengespeichert. Bitte mit Internetverbindung schließen und erneut öffnen.');
+      const missing = [];
+      for (const f in OFFLINE_FILES) if (!(await caches.match(f, { ignoreSearch: true }))) missing.push(OFFLINE_FILES[f] + ' (' + f + ')');
+      const ctl = !!navigator.serviceWorker.controller;
+      show(ctl ? 'good' : 'muted', ctl ? 'Bereit' : 'Bereit ab dem nächsten Öffnen',
+        (ctl ? 'Die App startet auch ohne Internetverbindung.' : 'Die App einmal schließen und erneut öffnen; danach startet sie auch ohne Internet.')
+        + (missing.length ? ' Nicht zwischengespeichert: ' + missing.map(esc).join(', ') + '. Diese Datei fehlt im Repository oder liegt in einem Unterordner.' : ''));
+    } catch (e) { show('warn', 'Prüfung nicht möglich', esc(e && e.message ? e.message : String(e))); }
+  }
+
+  function viewSettings() {
+    const th = P.theme, n = C.lst.length;
+    return `<div class="card set"><label>Design</label>
+        <div class="seg">${[['system', 'System'], ['light', 'Hell'], ['dark', 'Dunkel']].map(([k, l]) => `<button data-act="theme" data-theme="${k}" class="${k === th ? 'on' : ''}">${l}</button>`).join('')}</div></div>
+      <div class="card set"><label for="goal">Zielgewicht (kg)</label>
+        <div class="inline"><input type="text" inputmode="decimal" id="goal" placeholder="z.B. 72,50" value="${S.settings.goal != null ? num(S.settings.goal) : ''}"><button class="btn" data-act="goal" style="flex:0 0 120px">Speichern</button></div>
+        <p class="hint">Leer lassen und speichern, um das Ziel zu entfernen.</p></div>
+      <div class="card set"><label>Sicherung und Export</label><div class="stack">
+        <button class="btn" data-act="exp" data-fmt="json">Backup speichern (JSON)</button>
+        <div class="inline"><button class="btn ghost" data-act="exp" data-fmt="xlsx">Excel</button><button class="btn ghost" data-act="exp" data-fmt="csv">CSV</button></div></div>
+        <p class="hint">${LOCAL ? `Die Daten (${n} ${n === 1 ? 'Gewichtseintrag' : 'Gewichtseinträge'}) liegen ausschließlich auf diesem Gerät, in der App vom Home-Bildschirm. Wird die App entfernt, gehen sie ohne Backup verloren. Letztes Backup: ${P.lastBackup && L.isISO(P.lastBackup) ? dDate(P.lastBackup) : 'noch keines'}.` : `Die Daten (${n} ${n === 1 ? 'Gewichtseintrag' : 'Gewichtseinträge'}) liegen in der Datenbank dieses Artifacts in deinem Claude-Konto und sind nur für dich lesbar. Ein gelegentliches Backup schützt vor versehentlichem Löschen.`}</p></div>
+      ${LOCAL ? '<div class="card set"><label>Offline-Betrieb</label><div id="offState" class="hint" style="margin:0">Wird geprüft …</div></div>' : ''}
+      <div class="card set"><label>Import</label>
+        <button class="btn ghost" data-act="imp">Datei importieren (JSON, Excel, CSV)</button>
+        <p class="hint">Excel und CSV: benötigt werden eine Spalte mit dem Datum und eine mit dem Gewicht, optional eine Notizspalte. Die Spalten werden anhand der Kopfzeile erkannt; vor der Übernahme erscheint eine Vorschau.</p></div>
+      <div class="card set"><button class="btn danger" data-act="wipe">Alle Daten löschen</button></div>`;
+  }
+
+  /* Dialoge */
+  function openSheet(html) { $('#sheet').innerHTML = html; $('#scrim').classList.add('open'); }
+  function closeSheet() { $('#scrim').classList.remove('open'); $('#sheet').innerHTML = ''; if (Store.needRender) { Store.needRender = false; render(); } }
+  /* Ersatz fuer die im Artifact wirkungslose Browser-Rueckfrage: zweites Antippen bestaetigt */
+  function confirmTap(btn, label, fn) {
+    if (btn.dataset.armed) return fn();
+    const old = btn.textContent; btn.dataset.armed = '1'; btn.textContent = label;
+    setTimeout(() => { if (btn.isConnected) { delete btn.dataset.armed; btn.textContent = old; } }, 4000);
+  }
+  let toastTimer;
+  function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2200); }
+
+  function openEntry(date) {
+    if (!writable()) return;
+    date = date || C.today;
+    openSheet(`<h2 id="eTitle"></h2>
+      <div class="field"><label for="eDate">Datum</label><input type="date" id="eDate" value="${date}"></div>
+      <div class="field"><label for="eW">Gewicht (kg)</label><input type="text" inputmode="decimal" id="eW" class="big num" placeholder="0,00" autocomplete="off"></div>
+      <div class="field"><label for="eN">Notiz (optional)</label><textarea id="eN" rows="2" maxlength="300" placeholder="z.B. am Vortag Alkohol getrunken oder salzig gegessen"></textarea>
+        <p class="hint">Ohne Gewicht wird der Tag als "nicht gewogen" mit Notiz geführt.</p></div>
+      <div class="err" id="eErr"></div>
+      <div class="stack"><button class="btn" id="eSave">Speichern</button><button class="btn ghost" id="eCancel">Abbrechen</button><button class="btn danger" id="eDel" hidden>Eintrag löschen</button></div>`);
+    const fill = () => {
+      const d = $('#eDate').value, ex = S.entries[d];
+      $('#eTitle').textContent = ex ? 'Eintrag ändern' : d > C.today ? 'Notiz vormerken' : 'Gewicht eintragen';
+      $('#eW').value = ex && ex.weight != null ? num(ex.weight) : '';
+      $('#eN').value = ex ? ex.note || '' : '';
+      $('#eDel').hidden = !ex; $('#eErr').textContent = '';
+    };
+    fill();
+    $('#eDate').onchange = fill;
+    $('#eCancel').onclick = closeSheet;
+    $('#eSave').onclick = () => {
+      const d = $('#eDate').value, raw = $('#eW').value.trim(), note = $('#eN').value.trim();
+      const err = (m) => ($('#eErr').textContent = m);
+      if (!L.isISO(d)) return err('Bitte ein gültiges Datum wählen.');
+      let w = null;
+      if (raw) {
+        w = L.parseWeight(raw);
+        if (w == null) return err('Bitte ein Gewicht zwischen 20 und 400 kg eingeben, z.B. 74,70.');
+        if (d > C.today) return err('Für künftige Tage ist nur eine Notiz ohne Gewicht möglich.');
+      } else if (!note) return err('Bitte ein Gewicht oder eine Notiz eingeben.');
+      S.entries[d] = { weight: w, note };
+      persist([yearKey(d)]); closeSheet(); if (w != null) UI.sel = d; render();
+      toast(w != null ? 'Gespeichert: ' + num(w) + ' kg' : 'Notiz gespeichert');
+    };
+    $('#eDel').onclick = () => confirmTap($('#eDel'), 'Wirklich löschen? Erneut tippen', () => {
+      const d = $('#eDate').value;
+      delete S.entries[d]; persist([yearKey(d)]); closeSheet(); render(); toast('Eintrag gelöscht');
+    });
+    if (!S.entries[date]) $('#eW').focus();
+  }
+
+  function openPhase(id) {
+    if (!writable()) return;
+    const ex = S.phases.find((p) => p.id === id);
+    let type = ex ? ex.type : 'Diät';
+    openSheet(`<h2>${ex ? 'Phase ändern' : 'Phase hinzufügen'}</h2>
+      <div class="field"><label>Art</label><div class="seg" id="pType">${TYPES.map((t) => `<button data-type="${t}">${t}</button>`).join('')}</div></div>
+      <div class="field"><label for="pFrom">Beginn</label><input type="date" id="pFrom" value="${ex ? ex.from : C.today}"></div>
+      <div class="field"><label for="pTo">Ende</label><input type="date" id="pTo" value="${ex && ex.to ? ex.to : ''}">
+        <label class="check"><input type="checkbox" id="pOpen" ${!ex || !ex.to ? 'checked' : ''}> Laufend (ohne Enddatum)</label></div>
+      <div class="err" id="pErr"></div>
+      <div class="stack"><button class="btn" id="pSave">Speichern</button><button class="btn ghost" id="pCancel">Abbrechen</button>${ex ? '<button class="btn danger" id="pDel">Phase löschen</button>' : ''}</div>`);
+    const paint = () => { document.querySelectorAll('#pType button').forEach((b) => b.classList.toggle('on', b.dataset.type === type)); $('#pTo').disabled = $('#pOpen').checked; };
+    paint();
+    $('#pType').onclick = (e) => { const b = e.target.closest('button'); if (b) { type = b.dataset.type; paint(); } };
+    $('#pOpen').onchange = paint;
+    $('#pTo').onchange = () => { if ($('#pTo').value) { $('#pOpen').checked = false; paint(); } };
+    $('#pCancel').onclick = closeSheet;
+    $('#pSave').onclick = () => {
+      const from = $('#pFrom').value, to = $('#pOpen').checked ? null : $('#pTo').value;
+      const err = (m) => ($('#pErr').textContent = m);
+      if (!L.isISO(from)) return err('Bitte einen gültigen Beginn wählen.');
+      if (to !== null && !L.isISO(to)) return err('Bitte ein Enddatum wählen oder "Laufend" aktivieren.');
+      if (to && to < from) return err('Das Ende darf nicht vor dem Beginn liegen.');
+      const cand = { id: ex ? ex.id : 'p' + Date.now(), type, from, to };
+      const clash = S.phases.find((p) => p.id !== cand.id && L.phasesOverlap(p, cand));
+      if (clash) return err(`Überschneidung mit der Phase "${clash.type}" (${dDate(clash.from)} bis ${clash.to ? dDate(clash.to) : 'laufend'}). Bitte zuerst deren Zeitraum anpassen.`);
+      if (ex) Object.assign(ex, cand); else S.phases.push(cand);
+      persist(['meta']); closeSheet(); render(); toast('Phase gespeichert');
+    };
+    if (ex) $('#pDel').onclick = () => confirmTap($('#pDel'), 'Wirklich löschen? Erneut tippen', () => {
+      S.phases = S.phases.filter((p) => p.id !== ex.id); persist(['meta']); closeSheet(); render(); toast('Phase gelöscht');
+    });
+  }
+
+  /* Export (ueber die downloads-Faehigkeit; direkte Downloads sind im Artifact gesperrt) */
+  const XLSX_URL = LOCAL ? 'xlsx.mini.min.js' : 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.mini.min.js';
+  let xlsxLoading;
+  function loadXLSX() {
+    if (window.XLSX) return Promise.resolve(window.XLSX);
+    if (!xlsxLoading) xlsxLoading = new Promise((res, rej) => {
+      const s = document.createElement('script'); s.src = XLSX_URL;
+      s.onload = () => res(window.XLSX); s.onerror = () => { xlsxLoading = null; rej(new Error('Excel-Modul konnte nicht geladen werden')); };
+      document.head.appendChild(s);
+    });
+    return xlsxLoading;
+  }
+  function backupDone(name) { if (/\.json$/.test(name)) { P.lastBackup = C.today; storePrefs(); if (UI.tab === 'settings') render(); } }
+  async function deliverLocal(data, name) {
+    const type = /\.json$/.test(name) ? 'application/json' : /\.csv$/.test(name) ? 'text/csv' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    const blob = data instanceof Blob ? new Blob([data], { type }) : new Blob([data], { type });
+    try {
+      const file = new File([blob], name, { type });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file] }); backupDone(name); toast('Datei bereitgestellt'); return; }
+    } catch (e) { if (e && e.name === 'AbortError') return; }
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    backupDone(name); toast('Datei bereitgestellt');
+  }
+  async function deliver(data, name) {
+    if (LOCAL) return deliverLocal(data, name);
+    let dl = null;
+    try { if (window.claude && window.claude.use) dl = await window.claude.use('downloads'); } catch (e) { dl = null; }
+    if (!dl) return toast('Export ist in dieser Ansicht nicht verfügbar');
+    try { await dl.save({ filename: name, data }); backupDone(name); toast('Datei bereitgestellt'); }
+    catch (e) { if (!e || e.code !== 'declined') toast(e && e.code === 'rate_limited' ? 'Bitte kurz warten und erneut versuchen' : 'Export fehlgeschlagen'); }
+  }
+  const allDays = () => C.lst.concat(C.notes).sort((a, b) => (a.date < b.date ? -1 : 1));
+  async function doExport(fmt) {
+    const stamp = C.today;
+    if (fmt === 'json') {
+      const data = { app: 'gewichts-tracker', version: 2, exported: new Date().toISOString(), entries: S.entries, phases: S.phases, settings: S.settings };
+      return deliver(JSON.stringify(data, null, 1), `gewicht-backup-${stamp}.json`);
+    }
+    if (fmt === 'csv') {
+      const q = (s) => '"' + String(s).replace(/"/g, '""') + '"';
+      const lines = ['Datum;Gewicht (kg);Veränderung (kg);Notiz'].concat(allDays().map((e) => [dDate(e.date), e.weight == null ? 'nicht gewogen' : num(e.weight), e.delta == null ? '' : signed(e.delta).replace('±', ''), q(e.note)].join(';')));
+      return deliver('﻿' + lines.join('\r\n'), `gewicht-${stamp}.csv`);
+    }
+    try {
+      const X = await loadXLSX(), wb = X.utils.book_new();
+      const add = (name, rows) => X.utils.book_append_sheet(wb, X.utils.aoa_to_sheet(rows), name);
+      add('Tage', [['Datum', 'Gewicht (kg)', 'Veränderung (kg)', 'Notiz', 'Phase']].concat(allDays().map((e) => {
+        const p = L.phaseAt(S.phases, e.date);
+        return [dDate(e.date), e.weight == null ? 'nicht gewogen' : e.weight, e.delta == null ? null : e.delta, e.note, p ? p.type : ''];
+      })));
+      add('Wochen', [['Beginn (So)', 'Ende (Sa)', 'Durchschnitt (kg)', 'Messungen', 'Änderung zur Vorwoche (%)']].concat(
+        L.weekly(C.lst).map((g) => [dDate(g.start), dDate(g.end), L.round(g.avg, 2), g.count, g.changePct == null ? null : L.round(g.changePct, 3)])));
+      const buf = X.write(wb, { type: 'array', bookType: 'xlsx' });
+      return deliver(new Blob([buf]), `gewicht-${stamp}.xlsx`);
+    } catch (e) { toast(e.message || 'Export fehlgeschlagen'); }
+  }
+
+  /* Import */
+  async function handleFile(file) {
+    try {
+      const name = file.name.toLowerCase();
+      let found = [], backup = null, info = '', phases = [];
+      if (/\.xlsx?$/.test(name)) {
+        const X = await loadXLSX();
+        const wb = X.read(new Uint8Array(await file.arrayBuffer()), { type: 'array' });
+        const map = new Map(), phaseDays = {}; let skipped = 0, dup = 0;
+        // Mehrere Blaetter (z.B. je Jahr) werden zusammengefuehrt; Blaetter mit Notiz- oder Phasenspalte haben Vorrang.
+        // Ein Blatt, dessen Daten sich ueberwiegend mit bereits uebernommenen decken (z.B. eine Auswertung), bleibt aussen vor.
+        const rich = (r) => (r.noteCol >= 0 ? 1 : 0) + (r.phaseCol >= 0 ? 1 : 0);
+        const sheets = wb.SheetNames.map((sn) => ({ sn, res: L.rowsToEntries(X.utils.sheet_to_json(wb.Sheets[sn], { header: 1, raw: true, defval: '' })) }))
+          .filter((s) => s.res.entries.length).sort((a, b) => rich(b.res) - rich(a.res) || b.res.entries.length - a.res.entries.length);
+        const left = [];
+        for (const s of sheets) {
+          const hits = s.res.entries.filter((e) => map.has(e.date)).length;
+          if (hits > s.res.entries.length * 0.2) { left.push(s.sn); continue; }
+          for (const e of s.res.entries) if (!map.has(e.date)) map.set(e.date, e);
+          Object.assign(phaseDays, s.res.phaseDays);
+          skipped += s.res.skipped; dup += s.res.duplicates + hits;
+        }
+        found = [...map.values()].sort((a, b) => (a.date < b.date ? -1 : 1));
+        phases = L.phaseSegments(phaseDays);
+        info = infoText(skipped, dup) + (left.length ? ` Nicht übernommen (Daten decken sich mit einem anderen Tabellenblatt): ${left.map(esc).join(', ')}.` : '');
+      } else {
+        const text = await file.text();
+        let obj = null;
+        if (/^\s*\{/.test(text)) { try { obj = JSON.parse(text); } catch (e) { obj = null; } }
+        if (obj && obj.entries && typeof obj.entries === 'object') {
+          backup = obj;
+          for (const d in obj.entries) {
+            const e = obj.entries[d]; if (!L.isISO(d) || !e) continue;
+            const w = e.weight == null ? null : L.parseWeight(e.weight), note = String(e.note || '').slice(0, 300);
+            if (w != null || e.weight == null) found.push({ date: d, weight: w, note });
+          }
+          found.sort((a, b) => (a.date < b.date ? -1 : 1));
+          phases = cleanPhases(obj.phases);
+        } else {
+          const res = L.rowsToEntries(L.parseCSV(text));
+          found = res.entries; phases = L.phaseSegments(res.phaseDays); info = infoText(res.skipped, res.duplicates);
+        }
+      }
+      if (!found.length) return toast('Keine Einträge erkannt');
+      previewImport(found, backup, info, phases);
+    } catch (e) { toast('Datei konnte nicht gelesen werden'); }
+  }
+  function infoText(skipped, dup) {
+    const a = [];
+    if (skipped) a.push(`${skipped} Zeilen ohne erkennbares Datum und Gewicht wurden übersprungen (z.B. Überschriften).`);
+    if (dup) a.push(`${dup} Datumsangaben kamen mehrfach vor; es gilt jeweils der letzte Wert.`);
+    return a.join(' ');
+  }
+  function previewImport(found, backup, info, phases) {
+    let fresh = 0, changed = 0, same = 0;
+    for (const e of found) {
+      const ex = S.entries[e.date];
+      if (!ex) fresh++; else if (ex.weight !== e.weight || (ex.note || '') !== e.note) changed++; else same++;
+    }
+    const nw = found.filter((e) => e.weight != null).length;
+    const sample = found.filter((e) => e.weight != null).slice(-3).reverse().map((e) => `<div class="row"><span class="l"><span class="t">${dLong(e.date)}</span><div class="m num">${num(e.weight)} kg</div>${e.note ? `<div class="note">${esc(e.note)}</div>` : ''}</span></div>`).join('');
+    const goal = backup && backup.settings ? L.parseWeight(backup.settings.goal) : null;
+    openSheet(`<h2>Import prüfen</h2>
+      <p style="margin:0 0 10px">${found.length} Tage erkannt (${dDate(found[0].date)} bis ${dDate(found[found.length - 1].date)}), davon ${nw} mit Gewicht und ${found.length - nw} nur mit Notiz: <b>${fresh}</b> neu, <b>${changed}</b> abweichend von vorhandenen, ${same} identisch.</p>
+      ${info ? `<p class="hint" style="margin:0 0 10px">${info}</p>` : ''}
+      ${sample ? `<div class="card list" style="margin-bottom:12px">${sample}</div>` : ''}
+      ${phases.length ? `<label class="check" style="margin:0 0 12px"><input type="checkbox" id="iPh" ${S.phases.length ? '' : 'checked'}> ${phases.length} ${phases.length === 1 ? 'Phase' : 'Phasen'} aus der Datei übernehmen${S.phases.length ? ' (ersetzt die vorhandenen)' : ''}</label>` : ''}
+      <div class="stack">
+        ${changed ? '<button class="btn" id="iOver">Übernehmen, Vorhandene überschreiben</button>' : ''}
+        <button class="btn ${changed ? 'ghost' : ''}" id="iKeep">${changed ? 'Nur neue Tage übernehmen' : 'Übernehmen'}</button>
+        <button class="btn ghost" id="iCancel">Abbrechen</button></div>`);
+    const apply = (over) => {
+      if (!writable()) return;
+      let n = 0; const keys = new Set();
+      for (const e of found) if (over || !S.entries[e.date]) { S.entries[e.date] = { weight: e.weight, note: e.note }; keys.add(yearKey(e.date)); n++; }
+      if ($('#iPh') && $('#iPh').checked) { S.phases = phases.map((p, i) => ({ id: 'i' + Date.now() + i, type: p.type, from: p.from, to: p.to || null })); keys.add('meta'); }
+      if (goal != null && S.settings.goal == null) { S.settings.goal = goal; keys.add('meta'); }
+      persist([...keys]); closeSheet(); render(); toast(n + ' Tage übernommen');
+    };
+    if ($('#iOver')) $('#iOver').onclick = () => apply(true);
+    $('#iKeep').onclick = () => apply(false);
+    $('#iCancel').onclick = closeSheet;
+  }
+
+  /* Design: "System" belaesst die Vorgabe des Viewers (data-theme) bzw. des Betriebssystems */
+  const hostTheme = document.documentElement.getAttribute('data-theme');
+  function applyTheme() {
+    const t = P.theme === 'system' ? hostTheme : P.theme;
+    if (t) document.documentElement.setAttribute('data-theme', t); else document.documentElement.removeAttribute('data-theme');
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) { const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim(); if (bg) meta.setAttribute('content', bg); }
+  }
+
+  /* Ereignisse */
+  const ACT = {
+    entry: (b) => openEntry(b.dataset.date),
+    tab: (b) => { UI.tab = b.dataset.tab; window.scrollTo(0, 0); render(); },
+    range: (b) => {
+      if (b.dataset.range === 'CUSTOM' && !P.custom) P.custom = { from: L.addDays(C.today, -29), to: C.today };
+      P.range = b.dataset.range; UI.limit = 60; UI.sel = null; storePrefs(); render();
+    },
+    more: () => { UI.limit += 120; render(); },
+    mode: (b) => { UI.mode = b.dataset.mode; render(); },
+    phase: (b) => openPhase(b.dataset.id),
+    theme: (b) => { P.theme = b.dataset.theme; storePrefs(); applyTheme(); render(); },
+    goal: () => {
+      if (!writable()) return;
+      const raw = $('#goal').value.trim();
+      if (!raw) { S.settings.goal = null; persist(['meta']); render(); return toast('Ziel entfernt'); }
+      const g = L.parseWeight(raw);
+      if (g == null) return toast('Bitte ein Gewicht zwischen 20 und 400 kg eingeben');
+      S.settings.goal = g; persist(['meta']); render(); toast('Ziel gespeichert: ' + num(g) + ' kg');
+    },
+    exp: (b) => doExport(b.dataset.fmt),
+    imp: () => { if (!writable()) return; const f = $('#file'); f.value = ''; f.click(); },
+    wipe: (b) => {
+      if (!writable()) return;
+      confirmTap(b, 'Wirklich alle Daten löschen? Erneut tippen', () => {
+        const keys = new Set(Object.keys(S.entries).map(yearKey)); keys.add('meta');
+        S = blank(); persist([...keys]); render(); toast('Alle Daten gelöscht');
+      });
+    },
+  };
+
+  function init() {
+    const c = lsGet(CACHE);
+    if (c && c.entries && typeof c.entries === 'object') S = { entries: c.entries, phases: cleanPhases(c.phases), settings: { goal: c.settings ? c.settings.goal : null } };
+    P = Object.assign(P, lsGet(PREFS) || {});
+    applyTheme(); render();
+    $('#view').addEventListener('click', (e) => { const b = e.target.closest('[data-act]'); if (b && ACT[b.dataset.act]) ACT[b.dataset.act](b); });
+    $('#view').addEventListener('change', (e) => {
+      if (e.target.id === 'cFrom' || e.target.id === 'cTo') {
+        const f = $('#cFrom').value, t = $('#cTo').value;
+        if (L.isISO(f) && L.isISO(t)) { P.custom = { from: f, to: t }; UI.sel = null; storePrefs(); render(); }
+      }
+    });
+    $('#tabs').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) ACT.tab(b); });
+    $('#addBtn').addEventListener('click', () => openEntry());
+    $('#scrim').addEventListener('click', (e) => { if (e.target.id === 'scrim') closeSheet(); });
+    $('#file').addEventListener('change', (e) => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+    let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (UI.tab === 'home') drawChart(); }, 120); });
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && !$('#scrim').classList.contains('open')) render(); });
+    if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { applyTheme(); if (UI.tab === 'home') drawChart(); });
+    initStore();
+  }
+  init();
+})();
+
+</script>
+</body>
+</html>
